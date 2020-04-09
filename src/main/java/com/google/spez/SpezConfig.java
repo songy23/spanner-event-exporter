@@ -18,9 +18,7 @@ package com.google.spez;
 
 import com.typesafe.config.Config;
 
-/**
- * Creates the wrapper by passing in a typesafe Config object.
- */
+/** Creates the wrapper by passing in a typesafe Config object. */
 public class SpezConfig {
   public final int pollRate;
   public final String recordLimit;

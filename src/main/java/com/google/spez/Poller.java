@@ -18,7 +18,6 @@ package com.google.spez;
 
 import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutures;
-import com.google.cloud.ServiceOptions;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.cloud.pubsub.v1.stub.GrpcSubscriberStub;
 import com.google.cloud.pubsub.v1.stub.SubscriberStub;
@@ -461,11 +460,12 @@ class Poller {
         log.debug("--------------------------------- writerIndex " + bb.writerIndex());
         bb.getBytes(bb.readerIndex(), ba);
         final ByteString message = ByteString.copyFrom(ba);
-        log.info("Queue message ", message.toString(Charset.defaultCharset()));
+        log.info("Queue message " + message.toString(Charset.defaultCharset()));
 
         if (publishToPubSub) {
           final PubsubMessage pubSubMessage =
               PubsubMessage.newBuilder().setData(message).putAttributes("Topic", tableName).build();
+          log.info("Pubsub message", pubSubMessage);
           final ApiFuture<String> pubSubFuture = publisher.publish(pubSubMessage);
           pubSubFutureList.add(pubSubFuture);
         } else {
