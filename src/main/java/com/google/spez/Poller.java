@@ -51,6 +51,7 @@ import io.opencensus.exporter.trace.stackdriver.StackdriverExporter;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -92,7 +93,7 @@ import org.slf4j.LoggerFactory;
  */
 class Poller {
   private static final Logger log = LoggerFactory.getLogger(Poller.class);
-  private static final String PROJECT_ID = ServiceOptions.getDefaultProjectId();
+  private static final String PROJECT_ID = "span-cloud-testing";
   private static final String SAMPLE_SPAN = "SPEZ";
 
   private final int pollRate;
@@ -222,7 +223,9 @@ class Poller {
           try {
             poll();
           } catch (Exception e) {
-            log.error("poller failed", e);
+            if (!(e instanceof IllegalStateException)) {
+              log.error("poller failed", e);
+            }
 
             stop();
             System.exit(1);
@@ -316,7 +319,7 @@ class Poller {
   }
 
   private void poll() throws Exception {
-    log.info("polling ....");
+    log.debug("polling ....");
 
     final ByteBuf bb = Unpooled.directBuffer();
     final String[] ts = new String[1];
@@ -438,8 +441,8 @@ class Poller {
             }
           });
 
-      log.debug("Made Record");
-      log.debug(record.toString());
+      log.info("Made Record");
+      log.info(record.toString());
 
       try (final ByteBufOutputStream outputStream = new ByteBufOutputStream(bb)) {
 
@@ -458,6 +461,7 @@ class Poller {
         log.debug("--------------------------------- writerIndex " + bb.writerIndex());
         bb.getBytes(bb.readerIndex(), ba);
         final ByteString message = ByteString.copyFrom(ba);
+        log.info("Queue message ", message.toString(Charset.defaultCharset()));
 
         if (publishToPubSub) {
           final PubsubMessage pubSubMessage =
